@@ -5,6 +5,8 @@ from openai import OpenAI
 from dotenv import load_dotenv
 import os
 
+from database import conversations_collection
+
 # Load environment variables
 load_dotenv()
 
@@ -48,7 +50,15 @@ def chat(request: ChatRequest):
         ]
     )
 
+    reply = response.choices[0].message.content
+
+    conversations_collection.insert_one({
+        "conversation_id": request.conversation_id,
+        "message": request.message,
+        "response": reply,
+    })
+
     return {
-        "response": response.choices[0].message.content,
+        "response": reply,
         "conversation_id": request.conversation_id,
     }
